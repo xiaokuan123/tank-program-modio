@@ -1,0 +1,6 @@
+#count tankEnemy
+countTankEnemy=9
+defaultB=com.example.strategy.DefaultBullot
+defaultFour=com.example.strategy.FourBullot
+#bulluit method
+bullotMethod=four
