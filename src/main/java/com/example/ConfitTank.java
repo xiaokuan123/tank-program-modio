@@ -13,12 +13,12 @@ public class ConfitTank {
             e.printStackTrace();
         }
     }
-    public static String getInfo(String key){
+    public static Object getInfo(String key){
         if(p==null){
-            return "";
+            return null;
         }
         Object o = p.get(key);
-        return String.valueOf(o);
+        return o;
     }
 
     public static void main(String[] args) {

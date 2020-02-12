@@ -1,12 +1,12 @@
 package com.example;
 
-import com.example.strategy.StrategyFactory;
+import com.decorator.BullitDecorator;
 import lombok.Data;
 
 import java.awt.*;
 
 @Data
-public class Tank {
+public class Tank extends GameObject{
 
     private int x,y;
 
@@ -16,19 +16,18 @@ public class Tank {
 
     private Boolean live =true;
 
-    private TankFrame tankFrame;
-
     private static final int NUM = 20;
     public static final int T_WIDTH = ResourceMges.tankU.getWidth();
     public static final int T_THINTH = ResourceMges.tankU.getHeight();
 
-    public Tank(int x, int y, Dir dir,TankFrame tankFrame) {
+    public Tank(int x, int y, Dir dir) {
         super();
         this.x = x;
         this.y = y;
         this.dir = dir;
-        this.tankFrame =tankFrame;
+        GameModel.getInstanct().addObject(this);
     }
+    @Override
     public void paint(Graphics g) {
 
         //todo 展现图片方向
@@ -52,6 +51,16 @@ public class Tank {
         move();
     }
 
+    @Override
+    public int getWidth() {
+        return T_WIDTH;
+    }
+
+    @Override
+    public int getThinth() {
+        return T_THINTH;
+    }
+
     private void move() {
         if(!moveing){
             return;
@@ -72,16 +81,14 @@ public class Tank {
             default:
                 break;
         }
-    }
-    //todo 坦克开火设计模式方式
-    public void fire(StrategyFactory factory){
-        //todo 默认开火方式
-            factory.fire(this,this.tankFrame.baseFactory);
+        ;
     }
     public void makerBullot(){
         int xk =x + T_WIDTH /2 - Bullot.B_WIDTH/2;
-        int yk =y + T_THINTH /2 - Bullot.B_THINTH/2;;
-      tankFrame.listBulls.add(new Bullot(xk,yk,this.dir,this.tankFrame,Group.GOOD.getCode()));
+        int yk =y + T_THINTH /2 - Bullot.B_THINTH/2;
+        new Bullot(xk,yk,this.dir,Group.GOOD.getCode());
+        //todo 应用装饰模式
+      //new BullitDecorator(new Bullot(xk,yk,this.dir,Group.GOOD.getCode())) ;
       //
       new Thread(()->new Audio("audio/tank_fire.wav").play()).start();
     }

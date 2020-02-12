@@ -1,41 +1,36 @@
 package com.example;
 
-import com.example.factory.BaseBullet;
 import lombok.Data;
 
 import java.awt.*;
+import java.security.cert.TrustAnchor;
 
 @Data
-public class Bullot extends BaseBullet {
-
-    private int x,y;
-
+public class Bullot extends GameObject{
     private Dir dir=Dir.DOWN;
 
     private Boolean live=true;
 
-    private TankFrame tk=null;
 
     private String group ;
     private static final int NUM = 40;
     //定义子弹的正方形位置
-    Rectangle bulltR= new Rectangle();
+    Rectangle bulltRectange= new Rectangle();
 
     public static final int B_WIDTH = ResourceMges.bulltU.getWidth();
     public static final int B_THINTH = ResourceMges.bulltU.getHeight();
-    public Bullot(int x, int y, Dir dir,TankFrame tk,String group) {
+    public Bullot(int x, int y, Dir dir,String group) {
         super();
         this.x = x;
         this.y = y;
         this.dir = dir;
-        this.tk = tk;
         this.group = group;
-        tk.listBulls.add(this);
+        GameModel.getInstanct().addObject(this);
     }
     @Override
     public void paint(Graphics g) {
         if(!live){
-             tk.listBulls.remove(this);
+             GameModel.getInstanct().removeObject(this);
         }
         switch (dir) {
             case LIFT:
@@ -60,6 +55,16 @@ public class Bullot extends BaseBullet {
         move();
     }
 
+    @Override
+    public int getWidth() {
+        return B_WIDTH;
+    }
+
+    @Override
+    public int getThinth() {
+        return B_THINTH;
+    }
+
     private void move() {
         switch (dir) {
             case LIFT:
@@ -81,11 +86,10 @@ public class Bullot extends BaseBullet {
             this.live = false;
         }
         //todo x y,有变化时从新赋值
-        bulltR.setRect(x,y,B_WIDTH,B_THINTH);
+        bulltRectange.setRect(x,y,B_WIDTH,B_THINTH);
 
     }
-    @Override
-    public  void collison(TankEnemy enemy){
+    /*public  void collison(TankEnemy enemy){
         //todo 如果是自己的子弹和坦克就返回
         if(enemy.getGroup().equals(this.group)){
             return;
@@ -93,13 +97,12 @@ public class Bullot extends BaseBullet {
         //todo 怎么让这个正方形只new 一次
         //Rectangle bulltR = new Rectangle(x,y,B_WIDTH,B_THINTH);
         Rectangle emenTankR = enemy.getEmenTankR();//new Rectangle(enemy.getX(),enemy.getY(),TankEnemy.E_WIDTH,TankEnemy.E_THINTH);
-        if(bulltR.intersects(emenTankR)){
-            //tk.explodeList.add(new Explode(enemy.getX(),enemy.getY(),this.tk));
-            tk.explodeList.add(tk.baseFactory.getWeaponExplode(enemy.getX(),enemy.getY(),this.tk));
+        if(bulltRectange.intersects(emenTankR)){
+            gameModel.addObject(new Explode(enemy.getX(),enemy.getY(),this.gameModel));
             this.die();
             enemy.die();
         }
-    }
+    }*/
     public void die(){
         live=false;
     }

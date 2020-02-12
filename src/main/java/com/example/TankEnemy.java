@@ -1,20 +1,18 @@
 package com.example;
 
-import com.example.factory.BaseTank;
 import lombok.Data;
 
 import java.awt.*;
 import java.util.Random;
 
 @Data
-public class TankEnemy extends BaseTank {
+public class TankEnemy extends GameObject{
 
     private int x,y;
 
     private Dir dir=Dir.DOWN;
 
     private Boolean live =true;
-    private TankFrame tankFrame;
     private String group;
     public static final int E_WIDTH = ResourceMges.ememyTankD.getWidth();
     public static final int E_THINTH = ResourceMges.ememyTankD.getHeight();
@@ -22,22 +20,35 @@ public class TankEnemy extends BaseTank {
     Rectangle emenTankR = new Rectangle();
    Random random = new Random();
 
-    public TankEnemy(int x, int y, Dir dir, TankFrame tankFrame,String group) {
+    public TankEnemy(int x, int y, Dir dir,String group) {
         super();
         this.x = x;
         this.y = y;
         this.dir = dir;
-        this.tankFrame =tankFrame;
         this.group = group;
+        GameModel.getInstanct().addObject(this);
     }
-
     @Override
     public void paint(Graphics g) {
         if(!live){
-            this.tankFrame.enemyList.remove(this);
+            GameModel.getInstanct().removeObject(this);
         }
+       /* Color color = g.getColor();
+        g.setColor(Color.YELLOW);
+        g.fillRect(x, y, 50, 50);
+        g.setColor(color);*/
         g.drawImage(ResourceMges.ememyTankD,x,y,null);
         move();
+    }
+
+    @Override
+    public int getWidth() {
+        return E_WIDTH;
+    }
+
+    @Override
+    public int getThinth() {
+        return E_THINTH;
     }
 
     private void move() {
@@ -86,7 +97,7 @@ public class TankEnemy extends BaseTank {
     public void fire(){
         int xk =x + E_WIDTH /2 - Bullot.B_WIDTH/2;
         int yk =y + E_THINTH /2 - Bullot.B_THINTH/2;
-        new Bullot(xk,yk,this.dir,this.tankFrame,Group.BLUE.getCode());
+        new Bullot(xk,yk,this.dir,Group.BLUE.getCode());
     }
 
 
