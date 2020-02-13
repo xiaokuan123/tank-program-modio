@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>奖品兑换查询页</title>
+    <meta name="description" content="奖品兑换查询页"/>
+    <div th:replace="/system/resource/base/baseHead.template"></div>
+    <style>
+        .progress {
+            margin-bottom: 0
+        }
+    </style>
+</head>
+<body>
+<div th:include="/system/resource/base/baseNav.template"></div>
+<link th:href="${application.resourceUrl}+'/assets/css/datetimepicker.css'" rel="stylesheet"/>
+<div class="main-container container-fluid">
+    <div class="page-container">
+        <div class="page-sidebar" id="sidebar" th:include="/system/resource/base/baseLeftMenu.template"></div>
+        <div class="page-content">
+            <div class="page-breadcrumbs">
+                <ul class="breadcrumb"></ul>
+            </div>
+            <div class="page-body">
+                <!-- 这个div里面都是你的内容 -->
+                <div class="row">
+                    <div class="col-xs-12 col-md-12">
+                        <!-- 隐藏值:当前登录用户名 -->
+                        <input type="hidden" id="username" th:value="${session.session_user_name.username}"/>
+                        <!--查询-->
+                        <div id="query-div">
+                            <!-- 查询条件 -->
+                            <div class="widget">
+                                <div class="widget-header">
+                                    <span class="widget-caption"><i class="fa fa-cogs"></i>&nbsp;查询条件</span>
+                                </div>
+                                <div class="widget-body">
+                                    <form class="bv-form form-inline" id="query-form" method="post">
+                                        <center>
+                                            <table class="querytable">
+                                                <tr>
+                                                    <td class="form-group col-md-4">
+                                                        <label class="col-lg-5 control-label">手机号码：</label>
+                                                        <div class="form-group col-lg-7" style="padding-left:10px;">
+                                                            <input type="text" class="form-control input-sm" name="productNo"
+                                                                   id="productNo" placeholder="请输入用户手机号" />
+                                                        </div>
+                                                    </td>
+                                                    <td class="form-group col-md-4">
+                                                        <label class="col-lg-3 control-label">商场活动名称</label>
+                                                        <div class="form-group col-lg-7">
+                                                            <input class="form-control input-sm select2"
+                                                                   id="query_marketProductName" name="marketProductName" placeholder="请选择条件"
+                                                                   type="text"/>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="form-group col-md-4">
+                                                        <label class="col-lg-5 control-label">发放开始时间：</label>
+                                                        <div class="form-group col-lg-7">
+                                                            <input class="datetime input-sm select2"
+                                                                   data-bv-checkUnsafeLetters="true"
+                                                                   id="query_openStartTimeTemp" name="openStartTimeTemp"
+                                                                   placeholder="开始时间" type="text"/>
+                                                            <input id="query_openStartTime" name="createdAt" type="hidden">
+                                                        </div>
+                                                    </td>
+                                                    <td class="form-group col-md-4">
+                                                        <label class="col-lg-5 control-label">发放结束时间：</label>
+                                                        <div class="form-group col-lg-7">
+                                                            <input class="datetime input-sm select2"
+                                                                   data-bv-checkUnsafeLetters="true"
+                                                                   id="query_finishAtTemp" name="finishAtTemp"
+                                                                   placeholder="结束时间" type="text"/>
+                                                            <input id="query_finishAt" name="updatedAt" type="hidden">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <div class="form-group">
+                                                <div class="col-lg-12 col-lg-offset-5">
+                                                    <button type="button" class="btn default" onclick="doResetForm()">重置</button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <button id="queryMissionTaskInfo" type="button" class="btn btn-default"
+                                                            th:if="${session.button_menu['/PFIN/service/distributeAwardAdminService/queryAwardLogsList.do']}"
+                                                            onclick="checkData();$.bboss.form.doSearch('#query-form',initTableData);">查询
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </center>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- 查询结果 -->
+                            <div class="widget">
+                                <!-- 表格主体 -->
+                                <div class="widget-body" id="resultId">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="/system/resource/base/baseFoot.template"></div>
+<script th:src="${application.resourceUrl}+'/assets/js/datatable/jquery.dataTables.min.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/datatable/dataTables.tableTools.min.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/datatable/dataTables.bootstrap.min.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/datatable/DT_bootstrap.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/validation/bootstrapValidator.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/validation/bootstrapValidator_zh_CN.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/validator/bootstrapValidator-extend.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/datatable/datatable_client.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/datatable/datatable_server.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/form/form.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/select2/select2.min.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/select2/selectTab.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/dialog/dialog-page.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/dialog/bboss-dialog-page.js?'+${application.JSVERSION}"></script>
+<!--引入文件上传js-->
+<script th:src="${application.resourceUrl}+'/assets/js/jquery-file-upload/js/vendor/jquery.ui.widget.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/jquery-file-upload/js/jquery.iframe-transport.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/jquery-file-upload/js/jquery.fileupload.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/assets/js/lightbox/js/lightbox.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/upload/bboss-fileUpload.js?'+${application.JSVERSION}"></script>
+<!--Page Related Scripts-->
+<!--JS拆分，插入数据库时放开 -->
+<script th:src="${application.resourceUrl}+'/assets/js/datetime/bootstrap-datetimepicker.js?'+${application.JSVERSION}"></script>
+<script th:src="${application.resourceUrl}+'/bboss/js/export/export-base.js?'+${application.JSVERSION}"></script>
+
+<script th:inline="javascript">
+    // 数组.unshift(emptyOption);
+    var emptyOption = {id: "", text: ""};
+    $(document).ready(function () {
+        $("#query-form").bootstrapValidator();
+        handleDateTimePickerOrderTradeQuery();
+        //状态（查询） PLACEORDER-已下单，PAID-已支付，TRADESUCCESS-交易成功，TRADEFAIL-交易失败',
+        addValue();
+        $.bboss.form.doSearch('#query-form', initTableData);
+    });
+    function doResetForm(){
+        $('#query_openStartTimeTemp').val(null);
+        $('#query_openStartTime').val(null);
+        $('#query_finishAtTemp').val(null);
+        $('#query_finishAt').val(null);
+        $('#awardActivityName').val(null);
+        $('#productNo').val(null);
+        $('#awardActivityNo').val(null);
+    }
+    function getToday(date) {
+        var strDate = date.getFullYear()+"-";
+        strDate += date.getMonth()+1+"-";
+        strDate += date.getDate()+" ";
+        return strDate;
+    }
+    function getDateStr(date1) {
+        var strDate = date1.getFullYear()+"-";
+        strDate += date1.getMonth()+1+"-";
+        strDate += date1.getDate()+" ";
+        strDate += date1.getHours()+":";
+        strDate += date1.getMinutes()+":";
+        strDate += date1.getSeconds();
+        return strDate;
+    }
+    var  flag=false;
+    function checkData() {
+        var query_openStart = $('#query_openStartTimeTemp').val().trim();
+        var query_finish = $('#query_finishAtTemp').val().trim();
+        if ((query_openStart=="" || query_openStart ==null)||(query_finish=="" || query_finish ==null)){
+            bootbox.alert('分奖开始时间和结束时间必填！');
+            flag=true;
+        }
+        var oDate1 = new Date(query_openStart);
+        var oDate2 = new Date(query_finish);
+        if(oDate1.getTime() > oDate2.getTime()){
+            bootbox.alert('开始时间不可大于结束时间！');
+            return;
+        }
+
+    }
+    function addValue(){
+        var openStart=$('#query_openStartTimeTemp').val();
+        var finishAt=$('#query_finishAtTemp').val();
+
+        if(openStart!=null&&openStart!=""){
+            $("#query_openStartTime").val(getDateStr(new Date(openStart + " 00:00:00")));
+        }else{
+            //填充默认今天
+            $("#query_openStartTimeTemp").val(getToday(new Date()));
+            $("#query_openStartTime").val(getDateStr(new Date(getToday(new Date()) + " 00:00:00")));
+        }
+        if(finishAt!=null&&finishAt!=""){
+            $("#query_finishAt").val(getDateStr(new Date(finishAt+ " 23:59:59")));
+        }else{
+            //填充默认今天
+            $("#query_finishAtTemp").val(getToday(new Date()));
+            $("#query_finishAt").val(getDateStr(new Date(getToday(new Date()) + " 23:59:59")));
+        }
+    }
+
+    //时间控件
+    function handleDateTimePickerOrderTradeQuery() {
+        $(".datetime").datetimepicker({
+            maskInput: true,
+            autoclose: true,
+            pickSeconds: true,
+            pick12HourFormat: false,
+            minuteStep: 1,
+            language: 'cn',
+            minView: 2,
+            maxView: 3,
+            readonly: false,
+            format: "yyyy-mm-dd",
+            endDate: "2110-12-31",
+            beginDate: "2010-01-01",
+            pickerPosition: (false ? "bottom-right" : "bottom-left")
+        });
+        $('#query_openStartTimeTemp').on('change', function () {
+            addValue();
+        });
+        $('#query_finishAtTemp').on('change', function () {
+            addValue();
+        });
+    }
+
+    var initTableData = function (parms) {
+        var titleAndColumns = [
+            {title: '分奖编号', column: 'awardActivityNo'},
+            {title: '分奖名称', column: 'awardActivityName'},
+            {title: '原分奖时间', column: 'planAwardStartTime'},
+            {title: '手机号', column: 'productNo'},
+            {title: '可分奖金', column: 'totalAward'},
+            {title: '分奖状态', column: 'awardActivityStatus'},
+            {title: '实际分奖时间', column: 'realAwardStartTime'},
+            {title: '分奖失败原因', column: 'awardFailResult'}
+        ];
+
+        var url = WWWROOT + '/PFIN/service/distributeAwardAdminService/queryAwardLogsList.do';
+        var rowCallback = function (row, data) {
+            var now = new Date("1970-01-01 00:00:00.0").getTime();
+            var planAt = new Date(data.planAwardStartTime).getTime();
+            var realAt = new Date(data.realAwardStartTime).getTime();
+            if (planAt == now||planAt== null) {
+                $('td:eq(2)', row).html('<span></span>');
+            }
+            if (realAt == now||realAt== null) {
+                $('td:eq(6)', row).html('<span></span>');
+            }
+            if (data.awardActivityStatus == "BEFORE_AWARD"){
+                $('td:eq(5)', row).html('<span>返利之前</span>');
+            }else if (data.awardActivityStatus == "AWARD_ACCEPT_FAILURE") {
+                $('td:eq(5)', row).html('<span>返利提交受理请求失败</span>');
+            }else if (data.awardActivityStatus == "AWARD_ACCEPT_PENDING") {
+                $('td:eq(5)', row).html('<span>返利提交受理请求未决</span>');
+            }else if (data.awardActivityStatus == "AWARD_ACCEPT_SUCCESS") {
+                $('td:eq(5)', row).html('<span>返利提交受理请求成功</span>');
+            }else if (data.awardActivityStatus == "AWARD_ACCEPT_AWAIT") {
+                $('td:eq(5)', row).html('<span>正在返利中</span>');
+            }else if (data.awardActivityStatus == "AWARD_SUCCESS") {
+                $('td:eq(5)', row).html('<span>返利成功</span>');
+            }else if (data.awardActivityStatus == "AWARD_PENDING") {
+                $('td:eq(5)', row).html('<span>返利未决</span>');
+            }else if (data.awardActivityStatus == "AWARD_FAIL") {
+                $('td:eq(5)', row).html('<span>返利失败</span>');
+            }else {
+                $('td:eq(5)', row).html('<span></span>');
+            };
+            if (data.awardFailResult == null){
+                $('td:eq(7)', row).html('<span></span>');
+            };
+
+        };
+        _tableDataList = new $.bboss.datatableServer.init("resultId", "tableId", titleAndColumns, url, parms, rowCallback, true);
+    };
+</script>
+</body>
+</html>
